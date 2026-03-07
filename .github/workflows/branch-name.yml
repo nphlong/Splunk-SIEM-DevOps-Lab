@@ -1,0 +1,18 @@
+# .github/workflows/branch-name.yml
+name: Validate Branch Name
+on:
+  push:
+    branches-ignore:
+      - main
+      - dev
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch naming convention
+        run: |
+          if [[ ! "$GITHUB_REF" =~ refs/heads/(feature|fix)/.+ ]]; then
+            echo "❌ Branch name must start with feature/ or fix/"
+            exit 1
+          fi
