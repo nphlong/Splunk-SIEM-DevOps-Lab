@@ -48,5 +48,5 @@ Clone the repository and spin up the Dockerized Splunk cluster:
 ```bash
 git clone https://github.com/nphlong/splunk-siem-lab.git
 cd splunk-siem-lab
-docker-compose up -d
+docker compose up -d
 ```

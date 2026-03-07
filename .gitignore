@@ -1,0 +1,47 @@
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual environments
+venv/
+.env/
+.envrc
+*.env
+
+# Docker
+*.pid
+*.seed
+*.bak
+*.swp
+docker-compose.override.yml
+
+# Splunk data/config persistence
+splunk-data/
+splunk-etc/
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Secrets
+*.key
+*.pem
+*.crt
+*.secret
+*.password
+*.token
+
+# Logs
+*.log
+logs/
