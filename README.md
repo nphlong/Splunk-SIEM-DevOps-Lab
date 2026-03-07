@@ -46,7 +46,7 @@ Data Flow: [UF] → [HF] → [Indexer] → [Search Head]
 Clone the repository and spin up the Dockerized Splunk cluster:
 
 ```bash
-git clone https://github.com/nphlong/splunk-siem-lab.git
-cd splunk-siem-lab
+git clone https://github.com/nphlong/Splunk-SIEM-DevOps-Lab.git
+cd Splunk-SIEM-DevOps-Lab
 docker compose up -d
 ```

@@ -25,8 +25,8 @@ venv/
 docker-compose.override.yml
 
 # Splunk data/config persistence
-splunk-data/
-splunk-etc/
+splunk_data/
+splunk_etc/
 
 # IDE/editor configs
 .vscode/
