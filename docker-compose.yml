@@ -14,10 +14,5 @@ services:
       - "8089:8089"   # Splunk management port
       - "9997:9997"   # Splunk indexer receiving port
     volumes:
-      - splunk_home:/opt/splunk/var
-      - splunk_etc:/opt/splunk/etc
+      - ./splunk_etc:/opt/splunk/etc
     restart: unless-stopped
-
-volumes:
-  splunk_home:
-  splunk_etc:
