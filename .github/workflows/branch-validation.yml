@@ -17,6 +17,12 @@ jobs:
     steps:
       - name: Validate branch naming convention
         run: |
+          # Skip check for dev branch
+          if [[ "$GITHUB_REF" == "refs/heads/dev" ]]; then
+            echo "ℹ️ Skipping branch name check for dev"
+            exit 0
+          fi
+          # Enforce feature/ or fix/ prefix
           if [[ ! "$GITHUB_REF" =~ refs/heads/(feature|fix)/.+ ]]; then
             echo "❌ Branch name must start with feature/ or fix/"
             exit 1
