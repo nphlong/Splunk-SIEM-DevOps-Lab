@@ -1,0 +1,35 @@
+# .github/workflows/branch-validation.yml
+name: Branch Validation
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # ✅ Check branch naming convention
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch naming convention
+        run: |
+          if [[ ! "$GITHUB_REF" =~ refs/heads/(feature|fix)/.+ ]]; then
+            echo "❌ Branch name must start with feature/ or fix/"
+            exit 1
+          fi
+
+  # ✅ Enforce only dev → main merges
+  enforce-dev-to-main:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Verify source branch
+        run: |
+          if [[ "${{ github.head_ref }}" != "dev" ]]; then
+            echo "❌ Only dev branch can merge into main."
+            exit 1
+          fi
