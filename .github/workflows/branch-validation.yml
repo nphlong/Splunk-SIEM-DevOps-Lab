@@ -18,13 +18,17 @@ jobs:
     steps:
       - name: Validate branch naming convention
         run: |
+          # If this is a PR, use github.head_ref (source branch)
+          BRANCH_NAME="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+
           # Skip check for dev and main branches
-          if [[ "$GITHUB_REF" == "refs/heads/dev" || "$GITHUB_REF" == "refs/heads/main" ]]; then
-            echo "ℹ️ Skipping branch name check for $GITHUB_REF"
+          if [[ "$BRANCH_NAME" == "dev" || "$BRANCH_NAME" == "main" ]]; then
+            echo "ℹ️ Skipping branch name check for $BRANCH_NAME"
             exit 0
           fi
+
           # Enforce feature/ or fix/ prefix
-          if [[ ! "$GITHUB_REF" =~ refs/heads/(feature|fix)/.+ ]]; then
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|fix)/.+ ]]; then
             echo "❌ Branch name must start with feature/ or fix/"
             exit 1
           fi
