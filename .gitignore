@@ -1,47 +1,71 @@
-# OS-specific files
-.DS_Store
-Thumbs.db
+# ==========================================
+# 1. Terraform Specific
+# ==========================================
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraformrc
+terraform.rc
+.terraform.tfstate.lock.info
+# *.tfplan
 
-# Python
-__pycache__/
-*.py[cod]
-*.egg
-*.egg-info/
-dist/
-build/
-*.log
-
-# Virtual environments
-venv/
-.env/
-.envrc
-*.env
-
-# Docker
-*.pid
-*.seed
-*.bak
-*.swp
-docker-compose.override.yml
-
-# Splunk data/config persistence
-splunk_data/
-splunk_etc/
-
-# IDE/editor configs
-.vscode/
-.idea/
-*.sublime-workspace
-*.sublime-project
-
-# Secrets
+# ==========================================
+# 2. Secrets & Security
+# ==========================================
 *.key
 *.pem
 *.crt
 *.secret
 *.password
 *.token
+.env
+.envrc
+*.env
+# Terraform override files (có thể chứa secret)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
-# Logs
+# ==========================================
+# 3. Python & Virtual Environments
+# ==========================================
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+.env/
+
+# ==========================================
+# 4. Docker & System
+# ==========================================
+*.pid
+*.seed
+*.bak
+*.swp
+docker-compose.override.yml
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 5. Splunk & Logs
+# ==========================================
+splunk_data/
+splunk_etc/
 *.log
 logs/
+crash.log
+crash.*.log
+
+# ==========================================
+# 6. IDE/Editor Configs
+# ==========================================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project

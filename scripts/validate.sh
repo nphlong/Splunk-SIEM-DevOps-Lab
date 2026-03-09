@@ -1,0 +1,1 @@
+# Quick validation (search test, curl health checks)
