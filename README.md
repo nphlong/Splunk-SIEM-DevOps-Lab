@@ -23,6 +23,8 @@ Components included:
 
 Data Flow: [UF] → [HF] → [Indexer] → [Search Head]
 
+**Remark:** Local stacks with Docker compose faced a lot of confliction in terms of files permission in containers. Standalone Splunk works without issue but cannot spin up Splunk Distributed Topology
+
 ---
 
 ### Phase 2 – AWS Infrastructure as Code
