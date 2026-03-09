@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk-standalone
+    hostname: splunk-standalone
+    environment:
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+    ports:
+      - "8000:8000"   # Splunk Web UI
+      - "8089:8089"   # Splunk management port
+      - "9997:9997"   # Splunk indexer receiving port
+    volumes:
+      - ./splunk_etc:/opt/splunk/etc
+    restart: unless-stopped
