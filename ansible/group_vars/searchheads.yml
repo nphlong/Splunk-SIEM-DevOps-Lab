@@ -1,0 +1,6 @@
+---
+# Identity
+is_search_head: true
+
+# Security: Must match the Cluster Manager's secret
+splunk_secret: "SplunkSecret123!"

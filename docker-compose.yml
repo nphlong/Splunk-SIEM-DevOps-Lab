@@ -1,18 +1,109 @@
-version: '3.8'
+version: "3.8"
+
+# TO BE ADJUST BASED ON ANSIBLE PLAYBOOKS
 
 services:
-  splunk:
+  cm1:
     image: splunk/splunk:latest
-    container_name: splunk-standalone
-    hostname: splunk-standalone
+    hostname: cm1
     environment:
-      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
       - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
       - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
-    ports:
-      - "8000:8000"   # Splunk Web UI
-      - "8089:8089"   # Splunk management port
-      - "9997:9997"   # Splunk indexer receiving port
-    volumes:
-      - ./splunk_etc:/opt/splunk/etc
-    restart: unless-stopped
+      - SPLUNK_ROLE=splunk_cluster_master
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+    ports: ["8000:8000"]
+
+  idx1:
+    image: splunk/splunk:latest
+    hostname: idx1
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_indexer
+      - SPLUNK_CLUSTER_MASTER_URL=cm1
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+
+  idx2:
+    image: splunk/splunk:latest
+    hostname: idx2
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_indexer
+      - SPLUNK_CLUSTER_MASTER_URL=cm1
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+
+  sh1:
+    image: splunk/splunk:latest
+    hostname: sh1
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_search_head
+      - SPLUNK_CLUSTER_MASTER_URL=cm1
+      - SPLUNK_INDEXER_URL=idx1,idx2
+      - SPLUNK_DEPLOYER_URL=dep1
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+    ports: ["8001:8000"]
+
+  sh2:
+    image: splunk/splunk:latest
+    hostname: sh2
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_search_head
+      - SPLUNK_CLUSTER_MASTER_URL=cm1
+      - SPLUNK_INDEXER_URL=idx1,idx2
+      - SPLUNK_DEPLOYER_URL=dep1
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+    ports: ["8002:8000"]
+
+  dep1:
+    image: splunk/splunk:latest
+    hostname: dep1
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_deployer
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+
+  hf1:
+    image: splunk/splunk:latest
+    hostname: hf1
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_heavy_forwarder
+      - SPLUNK_INDEXER_URL=idx1,idx2
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+
+  uf1:
+    image: splunk/universalforwarder:latest
+    hostname: uf1
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_ROLE=splunk_universal_forwarder
+      - SPLUNK_INDEXER_URL=idx1,idx2
+      - SPLUNK_PASS4SYMMKEY=${SPLUNK_PASS4SYMMKEY}
+    networks: [splunknet]
+
+networks:
+  splunknet:
+    driver: bridge

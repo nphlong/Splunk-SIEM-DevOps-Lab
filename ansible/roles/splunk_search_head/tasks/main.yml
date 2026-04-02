@@ -1,0 +1,50 @@
+---
+- name: Check if admin user is ready on search head
+  become: true
+  command: "{{ splunk_home }}/bin/splunk list user -auth admin:{{ splunk_admin_password }}"
+  register: sh_admin_user_check
+  changed_when: false
+  failed_when: false
+
+- name: Restart Splunk once to apply seeded admin user when missing
+  become: true
+  become_user: splunk
+  command: "{{ splunk_home }}/bin/splunk restart --accept-license --answer-yes --no-prompt"
+  when: sh_admin_user_check.rc != 0
+
+- name: Wait for Splunk management API after admin seed restart
+  wait_for:
+    port: 8089
+    delay: 5
+    timeout: 300
+  when: sh_admin_user_check.rc != 0
+
+- name: Check search head configuration marker
+  become: true
+  stat:
+    path: "{{ splunk_home }}/etc/.ansible_markers/searchhead_configured"
+  register: searchhead_config_marker
+
+- name: Configure Search Head to use Indexer Clustering (one-time)
+  become: true
+  command: >
+    {{ splunk_home }}/bin/splunk edit cluster-config
+    -mode searchhead
+    -manager_uri https://{{ manager_ip }}:8089
+    -secret {{ splunk_secret }}
+    -auth admin:{{ splunk_admin_password }}
+  when: not searchhead_config_marker.stat.exists
+  notify: Restart Splunk
+
+- name: Write search head configuration marker
+  become: true
+  file:
+    path: "{{ splunk_home }}/etc/.ansible_markers/searchhead_configured"
+    state: touch
+    owner: splunk
+    group: splunk
+    mode: "0644"
+  when: not searchhead_config_marker.stat.exists
+
+- name: Ensure Splunk is restarted if config changed
+  meta: flush_handlers

@@ -1,0 +1,7 @@
+---
+# Matches the var.splunk_admin_password from your variables.tf
+splunk_admin_password: "YourSecurePassword123!"
+splunk_home: "/opt/splunk"
+# Uses the manager host from inventory, avoiding duplicate/manual IP updates.
+manager_ip: "{{ hostvars[groups['manager'][0]].ansible_host }}"
+splunk_secret: "SplunkSecret123!"

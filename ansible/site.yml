@@ -1,0 +1,53 @@
+---
+- name: 1. Verify Connectivity
+  hosts: splunk_cluster
+  roles:
+    - splunk_common
+
+- name: 2. Setup License and Cluster Manager
+  hosts: manager
+  roles:
+    - splunk_license_manager
+
+- name: 3. Setup Indexer Peers
+  hosts: indexers
+  roles:
+    - splunk_indexer
+
+- name: 4. Configure Search Heads (Nodes 0-2)
+  hosts: searchheads
+  roles:
+    - splunk_search_head
+
+- name: 5. Finalize License & Connectivity
+  hosts: indexers, searchheads
+  become: true
+  tasks:
+    - name: Check license link marker
+      stat:
+        path: "{{ splunk_home }}/etc/.ansible_markers/license_manager_linked"
+      register: license_link_marker
+
+    - name: Link to License Manager (one-time)
+      become_user: splunk
+      command: >
+        {{ splunk_home }}/bin/splunk edit licenser-localslave
+        -master_uri https://{{ manager_ip }}:8089
+        -auth admin:{{ splunk_admin_password }}
+      when: not license_link_marker.stat.exists
+      notify: Restart Splunk
+
+    - name: Write license link marker
+      file:
+        path: "{{ splunk_home }}/etc/.ansible_markers/license_manager_linked"
+        state: touch
+        owner: splunk
+        group: splunk
+        mode: "0644"
+      when: not license_link_marker.stat.exists
+
+  handlers:
+    - name: Restart Splunk
+      become: true
+      become_user: splunk
+      command: "{{ splunk_home }}/bin/splunk restart"
