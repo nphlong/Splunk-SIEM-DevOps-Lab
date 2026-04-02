@@ -1,1 +1,0 @@
-# Helper script to run `splunk show cluster-status`

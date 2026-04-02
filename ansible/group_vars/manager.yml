@@ -1,0 +1,11 @@
+---
+# Security & Connectivity
+splunk_secret: "SplunkSecret123!"
+splunk_replication_port: 8080
+
+# Cluster Policy (Manager Only)
+r_factor: 2
+s_factor: 2
+
+# Ansible Safeguard
+is_cluster_manager: true

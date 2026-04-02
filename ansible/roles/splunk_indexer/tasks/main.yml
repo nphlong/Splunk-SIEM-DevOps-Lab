@@ -1,0 +1,39 @@
+---
+- name: Wait for Cluster Manager API to be reachable
+  wait_for:
+    host: "{{ manager_ip }}"
+    port: 8089
+    delay: 10
+    timeout: 300
+
+- name: Check indexer peer configuration marker
+  become: true
+  stat:
+    path: "{{ splunk_home }}/etc/.ansible_markers/indexer_peer_configured"
+  register: indexer_peer_config_marker
+
+- name: Configure Indexer Peer (one-time)
+  become: true
+  command: >
+    {{ splunk_home }}/bin/splunk edit cluster-config
+    -mode peer
+    -manager_uri https://{{ manager_ip }}:8089
+    -replication_port {{ replication_port }}
+    -secret {{ splunk_secret }}
+    -auth admin:{{ splunk_admin_password }}
+  register: configure_indexer_peer
+  when: not indexer_peer_config_marker.stat.exists
+  retries: 6
+  delay: 15
+  until: configure_indexer_peer.rc == 0
+  notify: Restart Splunk
+
+- name: Write indexer peer configuration marker
+  become: true
+  file:
+    path: "{{ splunk_home }}/etc/.ansible_markers/indexer_peer_configured"
+    state: touch
+    owner: splunk
+    group: splunk
+    mode: "0644"
+  when: not indexer_peer_config_marker.stat.exists

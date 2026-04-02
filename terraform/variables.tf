@@ -1,9 +1,12 @@
-variable "splunk_password" {
+variable "splunk_admin_password" {
+  description = "The admin password for all Splunk instances"
   type        = string
-  description = "Admin password for Splunk"
+  sensitive   = true
+  default     = "YourSecurePassword123!" # Change this to your actual password
 }
 
-variable "splunk_image" {
-  type    = string
-  default = "splunk/splunk:latest"
+variable "splunk_ami_id" {
+  description = "Optional override for Splunk Enterprise AMI ID (recommended if marketplace lookup fails)"
+  type        = string
+  default     = ""
 }

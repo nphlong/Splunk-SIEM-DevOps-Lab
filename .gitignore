@@ -23,6 +23,7 @@ terraform.rc
 .env
 .envrc
 *.env
+*.ovpn
 # Terraform override files (có thể chứa secret)
 override.tf
 override.tf.json
@@ -58,6 +59,7 @@ Thumbs.db
 splunk_data/
 splunk_etc/
 *.log
+*.lic
 logs/
 crash.log
 crash.*.log

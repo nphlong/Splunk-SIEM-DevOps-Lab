@@ -1,0 +1,35 @@
+---
+- name: Create license directory
+  become: true
+  file:
+    path: "{{ splunk_home }}/etc/licenses/enterprise"
+    state: directory
+    owner: splunk
+    group: splunk
+
+- name: Upload License File
+  become: true
+  copy:
+    src: "files/splunk.lic"
+    dest: "{{ splunk_home }}/etc/licenses/enterprise/splunk.lic"
+    owner: splunk
+    group: splunk
+  register: license_added
+
+- name: Restart Splunk if license added
+  become: true
+  command: "{{ splunk_home }}/bin/splunk restart"
+  when: license_added.changed
+
+- name: Configure as Cluster Manager
+  become: true
+  command: >
+    {{ splunk_home }}/bin/splunk edit cluster-config
+    -mode manager
+    -replication_factor {{ r_factor }}
+    -search_factor {{ s_factor }}
+    -secret {{ splunk_secret }}
+    -auth admin:{{ splunk_admin_password }}
+  when:
+    - is_cluster_manager | default(false) == true
+  notify: Restart Splunk
