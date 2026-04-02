@@ -1,0 +1,96 @@
+---
+- name: Check if Splunk binary exists
+  stat:
+    path: "{{ splunk_home }}/bin/splunk"
+  register: splunk_bin
+
+- name: Check if bundled Splunk package exists
+  stat:
+    path: "/opt/splunk-10.2.1.tgz"
+  register: splunk_tgz
+
+- name: Install Splunk from bundled package when missing
+  become: true
+  unarchive:
+    src: "/opt/splunk-10.2.1.tgz"
+    dest: "/opt"
+    remote_src: true
+    owner: splunk
+    group: splunk
+  when:
+    - not splunk_bin.stat.exists
+    - splunk_tgz.stat.exists
+
+- name: Wait for Splunk binary to be present (AMI bootstrap)
+  wait_for:
+    path: "{{ splunk_home }}/bin/splunk"
+    timeout: 900
+    delay: 5
+
+- name: Check whether splunk systemd unit exists
+  become: true
+  command: systemctl list-unit-files splunk.service
+  register: splunk_unit_check
+  changed_when: false
+  failed_when: false
+
+- name: Ensure Splunk service is running (systemd unit path)
+  become: true
+  service:
+    name: splunk
+    state: started
+    enabled: yes
+  when: splunk_unit_check.rc == 0
+
+- name: Ensure Splunk directory ownership is correct
+  become: true
+  file:
+    path: "{{ splunk_home }}"
+    state: directory
+    owner: splunk
+    group: splunk
+    recurse: true
+  when: splunk_unit_check.rc != 0
+
+- name: Seed admin credentials for first start
+  become: true
+  copy:
+    dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
+    content: |
+      [user_info]
+      USERNAME = admin
+      PASSWORD = {{ splunk_admin_password }}
+    owner: splunk
+    group: splunk
+    mode: "0600"
+  when: splunk_unit_check.rc != 0
+
+- name: Start Splunk if not running (AMI path)
+  become: true
+  become_user: splunk
+  command: "{{ splunk_home }}/bin/splunk start --accept-license --answer-yes --no-prompt"
+  register: splunk_start
+  when: splunk_unit_check.rc != 0
+  changed_when: "'already running' not in (splunk_start.stdout | lower)"
+
+- name: Enable Splunk boot-start (AMI path)
+  become: true
+  command: "{{ splunk_home }}/bin/splunk enable boot-start -user splunk --accept-license --answer-yes --no-prompt"
+  register: splunk_boot_start
+  when: splunk_unit_check.rc != 0
+  changed_when: splunk_boot_start.rc == 0
+
+- name: Ensure Ansible marker directory exists
+  become: true
+  file:
+    path: "{{ splunk_home }}/etc/.ansible_markers"
+    state: directory
+    owner: splunk
+    group: splunk
+    mode: "0755"
+
+- name: Wait for Splunk Management Port (8089)
+  wait_for:
+    port: 8089
+    delay: 5
+    timeout: 300

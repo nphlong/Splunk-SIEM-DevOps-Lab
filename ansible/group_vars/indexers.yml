@@ -1,0 +1,5 @@
+---
+# Indexer Peer settings
+is_indexer_peer: true
+replication_port: 8080
+splunk_secret: "SplunkSecret123!"
